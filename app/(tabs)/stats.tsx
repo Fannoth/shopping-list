@@ -1,21 +1,26 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet } from 'react-native';
 import { fetchMyProducts } from '@/services/productsServices';
 import { Product } from '@/services/firebase.types';
+import { useFocusEffect } from 'expo-router';
 
 const StatsScreen: FC = () => {
-  const [total, setTotal] = useState<number>(0);
-  const [count, setCount] = useState<number>(0);
+  const [total, setTotal] = useState(0);
+  const [count, setCount] = useState(0);
 
-  useEffect(() => {
-    (async () => {
-      const prods = await fetchMyProducts() as Product[];
-      const bought = prods.filter(p => p.purchased);
-      setCount(bought.length);
-      setTotal(bought.reduce((sum, p) => sum + p.price, 0));
-    })();
-  }, []);
+  const fetchStats = async () => {
+    const prods = await fetchMyProducts() as Product[];
+    const bought = prods.filter(p => p.purchased);
+    setCount(bought.length);
+    setTotal(bought.reduce((s,p) => s + p.price, 0));
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchStats();
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.wrapper}>

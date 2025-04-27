@@ -1,20 +1,24 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState,  useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAvoidingView, Platform, FlatList, StyleSheet, Text } from 'react-native';
 import { fetchMyProducts } from '../../services/productsServices';
 import { Input } from '../../components/Input';
 import { Product } from '@/services/firebase.types';
+import { useFocusEffect } from 'expo-router';
 
 const FilterScreen: FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [query, setQuery] = useState<string>('');
+  const [query, setQuery] = useState('');
 
-  useEffect(() => {
-    (async () => {
-      const products = await fetchMyProducts();
-      setProducts(products as Product[]);
-    })();
-  }, []);
+  const loadProducts = async () => {
+    setProducts(await fetchMyProducts() as Product[]);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProducts();
+    }, [])
+  );
 
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -51,7 +55,7 @@ const styles = StyleSheet.create({
   wrapper: { flex: 1, backgroundColor: '#F4F4F8' },
   container: { flex: 1, padding: 20 },
   item: {
-    backgroundColor: '#fff',
+    backgroundColor: '#fff', 
     padding: 16,
     marginVertical: 8,
     borderRadius: 12,

@@ -11,10 +11,9 @@ const HomeScreen: FC = () => {
   const router = useRouter();
 
   const load = async () => setProducts(await fetchMyProducts() as Product[]);
-  useEffect(() => { load(); }, []);
   useFocusEffect(
     useCallback(() => {
-      load();
+      load();    
     }, [])
   );
 
@@ -30,12 +29,13 @@ const HomeScreen: FC = () => {
         <Button title="🔍 Wyszukaj w bazie" onPress={() => router.push('/search')} />
 
         <SectionList
+        contentContainerStyle={{ paddingBottom: 8 }}
           sections={sections}
           keyExtractor={item => item.id}
           renderSectionHeader={({ section: { title } }) => <Text style={styles.header}>{title}</Text>}
           renderItem={({ item }) => (
             <View style={styles.itemCard}>
-              <TouchableOpacity onPress={() => togglePurchased(item.id, item.purchased).then(load)}>
+              <TouchableOpacity onPress={() => togglePurchased(item.id, item.purchased).then(load)} style={styles.item}>
                 <Text style={[styles.itemText, item.purchased && styles.purchased]}>
                   {item.name} – {item.price.toFixed(2)} zł ({item.store})
                 </Text>
@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff', borderRadius: 12, padding: 16, marginVertical: 8,
     shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 6, elevation: 3
   },
+  item: { flex: 1, paddingRight: 20 },
   itemText: { fontSize: 16, color: '#333' },
   purchased: { textDecorationLine: 'line-through', color: 'gray' },
   deleteBtn: { backgroundColor: '#FF4D4F', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8 },
