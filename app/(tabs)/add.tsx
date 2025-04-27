@@ -1,46 +1,41 @@
-import { useState } from 'react';
-import { View, TextInput, Button, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// app/add.tsx
+import { FC, useState } from 'react';
+import { SafeAreaView, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Product } from '@/constants/types';
+import { addProduct } from '../../services/productsServices';
+import { Input } from '../../components/Input';
+import { Button } from '../../components/Button';
 
-export default function AddProductScreen() {
+const AddProductScreen: FC = () => {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [store, setStore] = useState('');
   const router = useRouter();
 
-  const addProduct = async () => {
+  const handleAdd = async () => {
     if (!name || !price || !store) return;
-    
-    const newProduct: Product = { 
-      id: Date.now().toString(), 
-      name, 
-      price: parseFloat(price), 
-      store, 
-      purchased: false 
-    };
-
-    const storedProducts = await AsyncStorage.getItem('shoppingList');
-    const products: Product[] = storedProducts ? JSON.parse(storedProducts) : [];
-
-    const updatedProducts = [newProduct, ...products];
-    await AsyncStorage.setItem('shoppingList', JSON.stringify(updatedProducts));
-
+    await addProduct({ name, price: parseFloat(price), store });
     router.back();
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput placeholder="Nazwa produktu" style={styles.input} onChangeText={setName} />
-      <TextInput placeholder="Cena" style={styles.input} keyboardType="numeric" onChangeText={setPrice} />
-      <TextInput placeholder="Sklep" style={styles.input} onChangeText={setStore} />
-      <Button title="Dodaj" onPress={addProduct} />
-    </View>
+    <SafeAreaView style={styles.wrapper}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <Input placeholder="Nazwa produktu" value={name} onChangeText={setName} />
+        <Input placeholder="Cena" keyboardType="decimal-pad" value={price} onChangeText={setPrice} />
+        <Input placeholder="Sklep" value={store} onChangeText={setStore} />
+        <Button title="Dodaj produkt" onPress={handleAdd} />
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
+  wrapper: { flex: 1, backgroundColor: '#F4F4F8' },
   container: { flex: 1, padding: 20 },
-  input: { borderWidth: 1, marginBottom: 10, padding: 8 }
 });
+
+export default AddProductScreen;

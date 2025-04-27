@@ -38,7 +38,6 @@ export const searchProducts = async (query: string) => {
       purchased: false
     }));
   } catch (error) {
-    console.error('Błąd pobierania danych z API:', error);
     return [];
   }
 };
